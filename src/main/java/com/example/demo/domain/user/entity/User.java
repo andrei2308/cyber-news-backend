@@ -1,7 +1,7 @@
-package com.example.demo.entities.user;
+package com.example.demo.domain.user.entity;
 
-import com.example.demo.entities.InformationEntity;
-import com.example.demo.entities.news.News;
+import com.example.demo.domain.InformationEntity;
+import com.example.demo.domain.news.entity.News;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,13 +12,16 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
+@Entity(name = "users")
 @Setter
 @Getter
 public class User extends InformationEntity {
 
     @Column(name = "UserRole")
     private String userRole;
+
+    @Column(name = "Email")
+    private String email;
 
     @Column(name = "Username", nullable = false, unique = true)
     private String username;

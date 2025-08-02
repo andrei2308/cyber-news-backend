@@ -1,7 +1,7 @@
-package com.example.demo.entities.news;
+package com.example.demo.domain.news.entity;
 
-import com.example.demo.entities.InformationEntity;
-import com.example.demo.entities.user.User;
+import com.example.demo.domain.InformationEntity;
+import com.example.demo.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;

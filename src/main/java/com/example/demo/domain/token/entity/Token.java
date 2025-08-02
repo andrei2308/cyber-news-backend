@@ -1,7 +1,8 @@
-package com.example.demo.Token;
+package com.example.demo.domain.token.entity;
 
-import com.example.demo.entities.BaseEntity;
-import com.example.demo.entities.user.User;
+import com.example.demo.domain.BaseEntity;
+import com.example.demo.domain.token.enums.TokenType;
+import com.example.demo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
