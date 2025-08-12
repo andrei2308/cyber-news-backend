@@ -1,17 +1,14 @@
 package com.example.demo.presentation.user;
 
 import com.example.demo.domain.constants.Constants;
+import com.example.demo.domain.token.entity.dto.RefreshTokenRequestDto;
+import com.example.demo.domain.token.entity.dto.TokenRefreshDto;
 import com.example.demo.domain.user.dtos.LoginVM;
 import com.example.demo.domain.user.dtos.RegisterVM;
 import com.example.demo.domain.user.dtos.UserDto;
 import com.example.demo.service.user.UserService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = UserController.API_USER_ROUTE)
@@ -33,5 +30,18 @@ public class UserController {
     public ResponseEntity<String> register(@RequestBody RegisterVM registerVM) {
         userService.register(registerVM);
         return ResponseEntity.ok("Registered successfully !");
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<TokenRefreshDto> refreshToken(@RequestBody RefreshTokenRequestDto refreshToken) {
+        TokenRefreshDto tokenRefreshDto = userService.refreshToken(refreshToken.getRefreshToken());
+        return ResponseEntity.ok(tokenRefreshDto);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        userService.logout(token);
+        return ResponseEntity.ok("Logout successfully !");
     }
 }

@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.example.demo.domain.constants.Constants.ACCESS_TOKEN_VALIDITY;
+import static com.example.demo.domain.constants.Constants.REFRESH_TOKEN_VALIDITY;
+
 @Component
 @NoArgsConstructor
 public class JwtUtil {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
-
-    @Value("${jwt.expiration:86400000}")
-    private long jwtExpiration;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -74,6 +74,10 @@ public class JwtUtil {
         return createToken(username, List.of("ROLE_USER"));
     }
 
+    public String generateRefreshToken(String username) {
+        return createRefreshToken(username, List.of("ROLE_USER"));
+    }
+
     public String generateToken(String username, List<String> roles) {
         return createToken(username, roles);
     }
@@ -83,7 +87,17 @@ public class JwtUtil {
                 .setSubject(subject)
                 .claim("roles", roles)
                 .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private String createRefreshToken(String subject, List<String> roles) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .claim("roles", roles)
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALIDITY))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

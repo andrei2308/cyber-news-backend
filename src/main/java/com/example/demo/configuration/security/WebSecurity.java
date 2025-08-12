@@ -44,6 +44,7 @@ public class WebSecurity {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/user/**").permitAll()
+                        .requestMatchers("/api/news/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
