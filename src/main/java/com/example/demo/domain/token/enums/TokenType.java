@@ -1,4 +1,4 @@
-package com.example.demo.Token;
+package com.example.demo.domain.token.enums;
 
 public enum TokenType {
     TOKEN,

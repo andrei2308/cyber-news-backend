@@ -1,5 +1,15 @@
 spring:
   application:
-    name = demo
+    name = cyber-news
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: ${JPA_DATABASE_PLATFORM}
+    show-sql: true
+  datasource:
+    url: ${DATASOURCE_URL}
+    username : ${DATASOURCE_USERNAME}
+    password : ${DATASOURCE_PASSWORD}
+    driver-class-name: ${DATASOURCE_DRIVER_CLASS_NAME}
 jwt:
   secretKey: ${SECRET_KEY}
