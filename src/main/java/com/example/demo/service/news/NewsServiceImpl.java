@@ -6,6 +6,7 @@ import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.news.repository.NewsRepository;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,34 +25,32 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsDto> getAllNews() {
-        List<News> newsList = newsRepository.findAll();
-
+        List<News> newsList = newsRepository.findAllWithUsers();
         return newsList.stream().map(this::mapNewsToNewsDto).toList();
     }
 
-    @Override
     public List<NewsDto> getUserNews(String userId) {
-        return userRepository.findById(userId)
-                .map(newsRepository::findNewsByUser)
-                .map(newsSet -> newsSet.stream()
-                        .map(this::mapNewsToNewsDto)
-                        .toList())
-                .orElse(List.of());
+        List<News> userNews = newsRepository.findNewsByUserIdWithUser(userId);
+        return userNews.stream()
+                .map(this::mapNewsToNewsDto)
+                .toList();
     }
 
     @Override
     public NewsDto createNewsForUser(String userId, NewsCreateVM newsCreateVM) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
+        try {
+            User userReference = userRepository.getReferenceById(userId);
+
+            News news = new News();
+            news.setUser(userReference);
+            news.setCreatedDate(new Date());
+            news.setDescription(newsCreateVM.description);
+            news.setCreatedBy(userReference.getUsername());
+
+            return mapNewsToNewsDto(newsRepository.save(news));
+        } catch (EntityNotFoundException e) {
             return null;
         }
-        News news = new News();
-        news.setUser(user);
-        news.setCreatedDate(new Date());
-        news.setDescription(newsCreateVM.description);
-        news.setCreatedBy(user.getUsername());
-
-        return mapNewsToNewsDto(newsRepository.save(news));
     }
 
     private NewsDto mapNewsToNewsDto(News news) {
