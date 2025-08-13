@@ -1,11 +1,14 @@
 package com.example.demo.service.news;
 
+import com.example.demo.domain.news.dtos.NewsCreateVM;
 import com.example.demo.domain.news.dtos.NewsDto;
 import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.news.repository.NewsRepository;
+import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -34,6 +37,21 @@ public class NewsServiceImpl implements NewsService {
                         .map(this::mapNewsToNewsDto)
                         .toList())
                 .orElse(List.of());
+    }
+
+    @Override
+    public NewsDto createNewsForUser(String userId, NewsCreateVM newsCreateVM) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        News news = new News();
+        news.setUser(user);
+        news.setCreatedDate(new Date());
+        news.setDescription(newsCreateVM.description);
+        news.setCreatedBy(user.getUsername());
+
+        return mapNewsToNewsDto(newsRepository.save(news));
     }
 
     private NewsDto mapNewsToNewsDto(News news) {
