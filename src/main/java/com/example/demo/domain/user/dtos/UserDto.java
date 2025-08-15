@@ -1,6 +1,7 @@
 package com.example.demo.domain.user.dtos;
 
 public class UserDto {
+    public String id;
     public String username;
     public String token;
     public String refreshToken;
