@@ -46,6 +46,7 @@ public class NewsServiceImpl implements NewsService {
             news.setCreatedDate(new Date());
             news.setDescription(newsCreateVM.description);
             news.setCreatedBy(userReference.getUsername());
+            news.setTitle(newsCreateVM.title);
 
             return mapNewsToNewsDto(newsRepository.save(news));
         } catch (EntityNotFoundException e) {
@@ -57,6 +58,8 @@ public class NewsServiceImpl implements NewsService {
         NewsDto newsDto = new NewsDto();
         newsDto.description = news.getDescription();
         newsDto.createdAt = news.getCreatedDate();
+        newsDto.title = news.getTitle();
+        newsDto.severity = news.getSeverity();
 
         if (news.getUser() != null) {
             newsDto.authorUsername = news.getUser().getUsername();
