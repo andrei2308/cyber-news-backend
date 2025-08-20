@@ -25,6 +25,13 @@ public class UserController {
         this.newsService = newsService;
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDto> getUser(@PathVariable String userId) {
+        UserDto userDto = userService.findUserById(userId);
+
+        return ResponseEntity.ok(userDto);
+    }
+
     @PostMapping(value = "/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginVM loginVM) {
         UserDto userDto = userService.login(loginVM);

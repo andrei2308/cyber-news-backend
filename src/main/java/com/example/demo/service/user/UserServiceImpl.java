@@ -11,6 +11,7 @@ import com.example.demo.domain.user.dtos.UserDto;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,13 +33,15 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
+    private final ModelMapper modelMapper;
 
-    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository) {
+    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, ModelMapper modelMapper) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.tokenRepository = tokenRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -81,10 +84,10 @@ public class UserServiceImpl implements UserService {
             saveToken(user, refreshToken, TokenType.REFRESH_TOKEN);
 
             UserDto userDto = new UserDto();
-            userDto.id = user.getId();
-            userDto.username = loginVM.username;
-            userDto.token = token;
-            userDto.refreshToken = refreshToken;
+            userDto.setId(user.getId());
+            userDto.setUsername(loginVM.username);
+            userDto.setToken(token);
+            userDto.setRefreshToken(refreshToken);
 
             return userDto;
         } catch (AuthenticationException ae) {
@@ -130,6 +133,12 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
         User user = storedToken.getUser();
         invalidateAllUserTokens(user);
+    }
+
+    @Override
+    public UserDto findUserById(String userId) {
+        return modelMapper.map(userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Could not find user with provided id !")), UserDto.class);
     }
 
     private void invalidateAllUserTokens(User user) {
