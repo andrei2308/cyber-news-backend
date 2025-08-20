@@ -2,6 +2,7 @@ package com.example.demo.domain.user.entity;
 
 import com.example.demo.domain.InformationEntity;
 import com.example.demo.domain.news.entity.News;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,7 +30,7 @@ public class User extends InformationEntity {
     @Column(name = "Password", nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnore
     private Set<News> news = new HashSet<>();
-
 }

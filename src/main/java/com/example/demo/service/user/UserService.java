@@ -10,13 +10,20 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserService {
     void register(RegisterVM registerVM);
+
     UserDto login(LoginVM loginVM);
 
     TokenRefreshDto refreshToken(String refreshToken);
 
     void logout(String token);
+
+    UserDto findUserById(String userId);
+
     User findByUsername(String username);
+
     User findByEmail(String email);
+
     boolean existsByEmail(String email);
+
     boolean existsByUsername(String username);
 }
