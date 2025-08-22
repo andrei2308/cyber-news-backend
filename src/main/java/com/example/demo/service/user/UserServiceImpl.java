@@ -83,9 +83,8 @@ public class UserServiceImpl implements UserService {
             saveToken(user, token, TokenType.TOKEN);
             saveToken(user, refreshToken, TokenType.REFRESH_TOKEN);
 
-            UserDto userDto = new UserDto();
-            userDto.setId(user.getId());
-            userDto.setUsername(loginVM.username);
+            UserDto userDto = modelMapper.map(user, UserDto.class);
+
             userDto.setToken(token);
             userDto.setRefreshToken(refreshToken);
 

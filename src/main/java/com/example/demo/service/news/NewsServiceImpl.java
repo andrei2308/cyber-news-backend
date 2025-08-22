@@ -50,6 +50,9 @@ public class NewsServiceImpl implements NewsService {
             news.setDescription(newsCreateVM.description);
             news.setCreatedBy(userReference.getUsername());
             news.setTitle(newsCreateVM.title);
+            news.setSeverity(newsCreateVM.severity);
+            news.setAffectedSystems(newsCreateVM.affectedSystems);
+            news.setScore(newsCreateVM.score);
 
             return modelMapper.map(newsRepository.save(news), NewsDto.class);
         } catch (EntityNotFoundException e) {

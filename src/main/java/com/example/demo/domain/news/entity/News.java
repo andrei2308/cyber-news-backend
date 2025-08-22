@@ -7,6 +7,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Setter
 @Getter
@@ -21,6 +24,12 @@ public class News extends InformationEntity {
     @Column(name = "Severity")
     @Enumerated(EnumType.STRING)
     private Severity severity;
+
+    @Column(name = "Score")
+    private double score;
+
+    @Column(name = "Affected_systems")
+    private String affectedSystems;
 
     @ManyToOne
     private User user;

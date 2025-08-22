@@ -15,6 +15,25 @@ public class NewsDto {
     String userId;
     Date createdDate;
     String authorUsername;
+    String affectedSystems;
+    double score;
+
+    public String getAffectedSystems() {
+        return affectedSystems;
+    }
+
+    public void setAffectedSystems(String affectedSystems) {
+        this.affectedSystems = affectedSystems;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
 
     @NotNull
     public Severity getSeverity() {
