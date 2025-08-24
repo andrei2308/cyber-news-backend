@@ -7,6 +7,7 @@ import com.example.demo.domain.news.repository.NewsRepository;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -40,16 +41,16 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    @Transactional
     public NewsDto createNewsForUser(String userId, NewsCreateVM newsCreateVM) {
         try {
             User userReference = userRepository.getReferenceById(userId);
 
-            News news = new News();
+            News news = modelMapper.map(newsCreateVM, News.class);
+
             news.setUser(userReference);
             news.setCreatedDate(new Date());
-            news.setDescription(newsCreateVM.description);
             news.setCreatedBy(userReference.getUsername());
-            news.setTitle(newsCreateVM.title);
 
             return modelMapper.map(newsRepository.save(news), NewsDto.class);
         } catch (EntityNotFoundException e) {
