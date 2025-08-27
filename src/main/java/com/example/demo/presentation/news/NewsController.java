@@ -1,6 +1,7 @@
 package com.example.demo.presentation.news;
 
 import com.example.demo.domain.constants.Constants;
+import com.example.demo.domain.news.dtos.CveDetailsResponse;
 import com.example.demo.domain.news.dtos.NewsDto;
 import com.example.demo.service.news.NewsService;
 import org.modelmapper.ModelMapper;
@@ -32,5 +33,12 @@ public class NewsController {
     @GetMapping(value = "/{userId}")
     public ResponseEntity<List<NewsDto>> getUserNews(@PathVariable String userId) {
         return ResponseEntity.ok(newsService.getUserNews(userId));
+    }
+
+    @GetMapping(value = "/details/{cveId}")
+    public ResponseEntity<CveDetailsResponse> getNewsDetails(@PathVariable String cveId) {
+        CveDetailsResponse cveDetailsResponse = newsService.fetchFromNIST(cveId);
+
+        return ResponseEntity.ok(cveDetailsResponse);
     }
 }
