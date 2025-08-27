@@ -13,3 +13,6 @@ spring:
     driver-class-name: ${DATASOURCE_DRIVER_CLASS_NAME}
 jwt:
   secretKey: ${SECRET_KEY}
+cve:
+  nist:
+    url: ${NIST_CVE_URI}
