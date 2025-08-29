@@ -17,6 +17,10 @@ public interface UserService {
 
     void logout(String token);
 
+    void follow(String userId);
+
+    void unfollow(String userId);
+
     UserDto findUserById(String userId);
 
     User findByUsername(String username);

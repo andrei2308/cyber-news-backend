@@ -8,20 +8,26 @@ import com.example.demo.domain.token.entity.dto.TokenRefreshDto;
 import com.example.demo.domain.user.dtos.LoginVM;
 import com.example.demo.domain.user.dtos.RegisterVM;
 import com.example.demo.domain.user.dtos.UserDto;
+import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.service.news.NewsService;
 import com.example.demo.service.user.UserService;
+import com.example.demo.service.userFollow.UserFollowService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = UserController.API_USER_ROUTE)
 public class UserController {
     public static final String API_USER_ROUTE = Constants.DEFAULT_ROUTE + "/user";
     private final UserService userService;
+    private final UserFollowService userFollowService;
     private final NewsService newsService;
 
-    public UserController(UserService userService, NewsService newsService) {
+    public UserController(UserService userService, UserFollowService userFollowService, NewsService newsService) {
         this.userService = userService;
+        this.userFollowService = userFollowService;
         this.newsService = newsService;
     }
 
@@ -60,5 +66,27 @@ public class UserController {
     @PostMapping("/{userId}/create-news")
     public ResponseEntity<NewsDto> createNewsForUser(@PathVariable String userId, @RequestBody NewsCreateVM newsCreateVM) {
         return ResponseEntity.ok(newsService.createNewsForUser(userId, newsCreateVM));
+    }
+
+    @PostMapping("{userId}/follow")
+    public ResponseEntity<String> follow(@PathVariable String userId) {
+        userService.follow(userId);
+        return ResponseEntity.ok("User followed !");
+    }
+
+    @GetMapping("{userId}/followers")
+    public ResponseEntity<List<UserProfile>> getFollowers(@PathVariable String userId) {
+        return ResponseEntity.ok(userFollowService.getFollowers(userId));
+    }
+
+    @GetMapping("{userId}/following")
+    public ResponseEntity<List<UserProfile>> getFollowing(@PathVariable String userId) {
+        return ResponseEntity.ok(userFollowService.getFollowing(userId));
+    }
+
+    @PostMapping("{userId}/unfollow")
+    public ResponseEntity<String> unfollow(@PathVariable String userId) {
+        userService.unfollow(userId);
+        return ResponseEntity.ok("User unfollowed !");
     }
 }

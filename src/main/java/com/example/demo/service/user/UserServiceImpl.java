@@ -10,14 +10,18 @@ import com.example.demo.domain.user.dtos.RegisterVM;
 import com.example.demo.domain.user.dtos.UserDto;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
+import com.example.demo.service.userFollow.UserFollowService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +37,16 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
+    private final UserFollowService userFollowService;
     private final ModelMapper modelMapper;
 
-    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, ModelMapper modelMapper) {
+    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, UserFollowService userFollowService, ModelMapper modelMapper) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.tokenRepository = tokenRepository;
+        this.userFollowService = userFollowService;
         this.modelMapper = modelMapper;
     }
 
@@ -140,6 +146,81 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Could not find user with provided id !")), UserDto.class);
     }
 
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void follow(String userId) {
+        final User currentUser = getCurrentUser();
+        final User userToFollow = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean alreadyFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
+        if (alreadyFollowing) {
+            throw new IllegalStateException("Already following this user !");
+        }
+
+        userFollowService.followUser(currentUser, userToFollow);
+
+    }
+
+    @Override
+    public void unfollow(String userId) {
+        final User currentUser = getCurrentUser();
+        final User userToUnfollow = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean notFollowing = userFollowService.checkNotFollowing(currentUser.getId(), userToUnfollow.getId());
+        if (notFollowing) {
+            throw new IllegalStateException("Not following user !");
+        }
+
+        userFollowService.unfollowUser(currentUser, userToUnfollow);
+    }
+
+    private User getCurrentUser() {
+        String username = getCurrentUsername();
+
+        return userRepository.findByUsername(username).orElseThrow(() -> new AccessDeniedException("Access denied"));
+    }
+
+    private String getCurrentUsername() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Access is denied !");
+        }
+
+        final Object principal = authentication.getPrincipal();
+
+        if (principal instanceof User user) {
+            return user.getUsername();
+        }
+
+        if (principal instanceof Jwt jwt) {
+            return jwt.getSubject();
+        }
+
+        return principal.toString();
+    }
+
     private void invalidateAllUserTokens(User user) {
         List<Token> validTokens = tokenRepository.findByUserAndValidity(user, true);
         validTokens.forEach(token -> {
@@ -170,27 +251,5 @@ public class UserServiceImpl implements UserService {
         token.setValidity(true);
         token.setCreatedDate(new Date());
         tokenRepository.save(token);
-    }
-
-    @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    }
-
-    @Override
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    }
-
-    @Override
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    @Override
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
     }
 }

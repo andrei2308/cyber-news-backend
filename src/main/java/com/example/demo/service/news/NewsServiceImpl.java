@@ -87,31 +87,64 @@ public class NewsServiceImpl implements NewsService {
 
     private CveData extractCveData(CveMinimal cve) {
 
-        Double score = cve.getMetrics()
-                .getCvssMetricV31()
-                .get(0).getCvssData()
-                .getBaseScore();
+        String affectedSystems;
+        Double score;
+        Severity severity;
 
-        Severity severity = Severity.valueOf(
-                cve.getMetrics()
-                        .getCvssMetricV31()
-                        .get(0).
-                        getCvssData()
-                        .getBaseSeverity()
-        );
+        if (cve.getMetrics().getCvssMetricV31() != null) {
+            score = cve.getMetrics()
+                    .getCvssMetricV31()
+                    .get(0).getCvssData()
+                    .getBaseScore();
 
-        String affectedSystems = "Not applicable";
+            severity = Severity.valueOf(
+                    cve.getMetrics()
+                            .getCvssMetricV31()
+                            .get(0).
+                            getCvssData()
+                            .getBaseSeverity()
+            );
 
-        if (cve.getConfigurations() != null) {
+            affectedSystems = "Not applicable";
 
-            affectedSystems = cve
-                    .getConfigurations()
-                    .get(0)
-                    .getNodes()
-                    .get(0)
-                    .getCpeMatch()
-                    .get(0)
-                    .getCriteria();
+            if (cve.getConfigurations() != null) {
+
+                affectedSystems = cve
+                        .getConfigurations()
+                        .get(0)
+                        .getNodes()
+                        .get(0)
+                        .getCpeMatch()
+                        .get(0)
+                        .getCriteria();
+            }
+        } else {
+            score = cve.getMetrics()
+                    .getCvssMetricV2()
+                    .get(0).getCvssData()
+                    .getBaseScore();
+
+            severity = Severity.valueOf(
+                    cve.getMetrics()
+                            .getCvssMetricV2()
+                            .get(0).
+                            getCvssData()
+                            .getBaseSeverity()
+            );
+
+            affectedSystems = "Not applicable";
+
+            if (cve.getConfigurations() != null) {
+
+                affectedSystems = cve
+                        .getConfigurations()
+                        .get(0)
+                        .getNodes()
+                        .get(0)
+                        .getCpeMatch()
+                        .get(0)
+                        .getCriteria();
+            }
         }
 
         return new CveData(severity, score, affectedSystems);
