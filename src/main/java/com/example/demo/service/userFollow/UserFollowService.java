@@ -1,10 +1,7 @@
 package com.example.demo.service.userFollow;
 
-import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.domain.user.entity.User;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface UserFollowService {
@@ -15,8 +12,4 @@ public interface UserFollowService {
     void followUser(User currentUser, User followingUser);
 
     void unfollowUser(User currentUser, User unfollowingUser);
-
-    List<UserProfile> getFollowers(String userId);
-
-    List<UserProfile> getFollowing(String userId);
 }
