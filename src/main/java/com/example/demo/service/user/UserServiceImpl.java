@@ -173,13 +173,10 @@ public class UserServiceImpl implements UserService {
         final User currentUser = getCurrentUser();
         final User userToFollow = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        boolean alreadyFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
-        if (alreadyFollowing) {
-            throw new IllegalStateException("Already following this user !");
-        }
+        checkNotAlreadyFollowing(currentUser, userToFollow);
+        checkNotFollowingItself(currentUser, userToFollow);
 
         userFollowService.followUser(currentUser, userToFollow);
-
     }
 
     @Override
@@ -187,10 +184,8 @@ public class UserServiceImpl implements UserService {
         final User currentUser = getCurrentUser();
         final User userToUnfollow = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        boolean notFollowing = userFollowService.checkNotFollowing(currentUser.getId(), userToUnfollow.getId());
-        if (notFollowing) {
-            throw new IllegalStateException("Not following user !");
-        }
+        checkIsFollowing(currentUser, userToUnfollow);
+        checkNotUnfollowingItself(currentUser, userToUnfollow);
 
         userFollowService.unfollowUser(currentUser, userToUnfollow);
     }
@@ -251,5 +246,31 @@ public class UserServiceImpl implements UserService {
         token.setValidity(true);
         token.setCreatedDate(new Date());
         tokenRepository.save(token);
+    }
+
+    private void checkNotAlreadyFollowing(User currentUser, User userToFollow) {
+        boolean alreadyFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
+        if (alreadyFollowing) {
+            throw new IllegalStateException("Already following this user !");
+        }
+    }
+
+    private void checkNotFollowingItself(User currentUser, User userToFollow) {
+        if (currentUser.getId().equals(userToFollow.getId())) {
+            throw new IllegalStateException("You can not follow yourself !");
+        }
+    }
+
+    private void checkNotUnfollowingItself(User currentUser, User userToUnfollow) {
+        if (currentUser.getId().equals(userToUnfollow.getId())) {
+            throw new IllegalStateException("You can not unfollow yourself !");
+        }
+    }
+
+    private void checkIsFollowing(User currentUser, User userToFollow) {
+        boolean notFollowing = userFollowService.checkNotFollowing(currentUser.getId(), userToFollow.getId());
+        if (!notFollowing) {
+            throw new IllegalStateException("You can not unfollow a user you don't follow !");
+        }
     }
 }
