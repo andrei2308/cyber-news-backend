@@ -11,10 +11,15 @@ import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.news.repository.NewsRepository;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
+import com.example.demo.service.userLike.UserLikeService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,19 +29,22 @@ import java.util.List;
 @Service
 public class NewsServiceImpl implements NewsService {
 
-    private final RestTemplate restTemplate;
+    private final UserLikeService userLikeService;
 
+    private final RestTemplate restTemplate;
     private final NewsRepository newsRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     @Value("${cve.nist.url}")
     private String nistUrl;
 
-    public NewsServiceImpl(NewsRepository newsRepository, UserRepository userRepository, ModelMapper modelMapper, RestTemplate restTemplate) {
+
+    public NewsServiceImpl(NewsRepository newsRepository, UserRepository userRepository, ModelMapper modelMapper, RestTemplate restTemplate, UserLikeService userLikeService) {
         this.newsRepository = newsRepository;
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.restTemplate = restTemplate;
+        this.userLikeService = userLikeService;
     }
 
     @Override
@@ -83,6 +91,24 @@ public class NewsServiceImpl implements NewsService {
         CveData cveData = extractCveData(cve);
 
         return new CveDetailsResponse(true, cveData, "");
+    }
+
+    @Override
+    @Transactional
+    public void likeNews(String newsId) {
+        User currentUser = getCurrentUser();
+        News newsToLike = newsRepository.findById(newsId).orElseThrow(() -> new IllegalArgumentException("News not found !"));
+
+        userLikeService.like(currentUser, newsToLike);
+    }
+
+    @Override
+    @Transactional
+    public void unlikeNews(String newsId) {
+        User currentUser = getCurrentUser();
+        News newsToUnlike = newsRepository.findById(newsId).orElseThrow(() -> new IllegalArgumentException("News not found !"));
+
+        userLikeService.unlike(currentUser, newsToUnlike);
     }
 
     private CveData extractCveData(CveMinimal cve) {
@@ -148,5 +174,31 @@ public class NewsServiceImpl implements NewsService {
         }
 
         return new CveData(severity, score, affectedSystems);
+    }
+
+    private User getCurrentUser() {
+        String username = getCurrentUsername();
+
+        return userRepository.findByUsername(username).orElseThrow(() -> new AccessDeniedException("Access denied"));
+    }
+
+    private String getCurrentUsername() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Access is denied !");
+        }
+
+        final Object principal = authentication.getPrincipal();
+
+        if (principal instanceof User user) {
+            return user.getUsername();
+        }
+
+        if (principal instanceof Jwt jwt) {
+            return jwt.getSubject();
+        }
+
+        return principal.toString();
     }
 }

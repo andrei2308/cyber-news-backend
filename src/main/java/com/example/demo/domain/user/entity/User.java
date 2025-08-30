@@ -2,7 +2,8 @@ package com.example.demo.domain.user.entity;
 
 import com.example.demo.domain.InformationEntity;
 import com.example.demo.domain.news.entity.News;
-import com.example.demo.domain.userFollow.UserFollow;
+import com.example.demo.domain.newsLikes.entity.NewsLikes;
+import com.example.demo.domain.userFollow.entity.UserFollow;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,4 +43,8 @@ public class User extends InformationEntity {
     @OneToMany(mappedBy = "following", fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
     private Set<UserFollow> followers = new HashSet<>();
+
+    @OneToMany(mappedBy = "likedUser", fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnore
+    private Set<NewsLikes> likedNews = new HashSet<>();
 }

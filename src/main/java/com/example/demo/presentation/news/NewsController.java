@@ -4,12 +4,8 @@ import com.example.demo.domain.constants.Constants;
 import com.example.demo.domain.news.dtos.CveDetailsResponse;
 import com.example.demo.domain.news.dtos.NewsDto;
 import com.example.demo.service.news.NewsService;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,11 +14,9 @@ import java.util.List;
 public class NewsController {
     public static final String API_NEWS_ROUTE = Constants.DEFAULT_ROUTE + "/news";
     private final NewsService newsService;
-    private final ModelMapper modelMapper;
 
-    public NewsController(NewsService newsService, ModelMapper modelMapper) {
+    public NewsController(NewsService newsService) {
         this.newsService = newsService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping
@@ -40,5 +34,17 @@ public class NewsController {
         CveDetailsResponse cveDetailsResponse = newsService.fetchFromNIST(cveId);
 
         return ResponseEntity.ok(cveDetailsResponse);
+    }
+
+    @PostMapping(value = "/{newsId}/like")
+    public ResponseEntity<String> like(@PathVariable String newsId) {
+        newsService.likeNews(newsId);
+        return ResponseEntity.ok("Successfully liked !");
+    }
+
+    @PostMapping(value = "{newsId}/unlike")
+    public ResponseEntity<String> unlike(@PathVariable String newsId) {
+        newsService.unlikeNews(newsId);
+        return ResponseEntity.ok("Successfully unliked !");
     }
 }

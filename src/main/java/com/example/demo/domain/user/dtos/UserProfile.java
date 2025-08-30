@@ -14,4 +14,13 @@ public class UserProfile {
     private String id;
     private Set<UserFollowDto> followers;
     private Set<UserFollowDto> following;
+
+    public UserProfile() {
+    }
+
+    public UserProfile(String id, String username, String email) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+    }
 }

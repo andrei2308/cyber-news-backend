@@ -2,6 +2,8 @@ package com.example.demo.configuration.mapper;
 
 import com.example.demo.domain.news.dtos.NewsDto;
 import com.example.demo.domain.news.entity.News;
+import com.example.demo.domain.newsLikes.dtos.NewsLikeDto;
+import com.example.demo.domain.newsLikes.entity.NewsLikes;
 import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.userFollow.dtos.UserFollowDto;
@@ -26,6 +28,7 @@ public class MapperConfig {
             protected void configure() {
                 map(source.getUser().getId(), destination.getUserId());
                 map(source.getUser().getUsername(), destination.getAuthorUsername());
+                using(newsLikesConverter()).map(source.getUserLikes(), destination.getUserLikes());
             }
         });
 
@@ -38,6 +41,21 @@ public class MapperConfig {
         });
 
         return modelMapper;
+    }
+
+    private Converter<Set<NewsLikes>, Set<NewsLikeDto>> newsLikesConverter() {
+        return context -> {
+            Set<NewsLikes> newsLikes = context.getSource();
+            if (newsLikes == null) return null;
+
+            return newsLikes.stream()
+                    .map(like -> new NewsLikeDto(
+                            like.getLikedUser().getId(),
+                            like.getLikedUser().getUsername(),
+                            like.getLikedUser().getEmail()
+                    ))
+                    .collect(Collectors.toSet());
+        };
     }
 
     private Converter<Set<UserFollow>, Set<UserFollowDto>> followersConverter() {

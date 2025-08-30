@@ -2,13 +2,14 @@ package com.example.demo.domain.news.entity;
 
 import com.example.demo.domain.InformationEntity;
 import com.example.demo.domain.enums.Severity;
+import com.example.demo.domain.newsLikes.entity.NewsLikes;
 import com.example.demo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -33,4 +34,7 @@ public class News extends InformationEntity {
 
     @ManyToOne
     private User user;
+
+    @OneToMany(mappedBy = "likedPost", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<NewsLikes> userLikes = new HashSet<>();
 }
