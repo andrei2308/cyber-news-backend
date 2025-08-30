@@ -1,7 +1,7 @@
 package com.example.demo.domain.userFollow.repository;
 
 import com.example.demo.domain.user.entity.User;
-import com.example.demo.domain.userFollow.UserFollow;
+import com.example.demo.domain.userFollow.entity.UserFollow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

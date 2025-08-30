@@ -1,4 +1,4 @@
-package com.example.demo.domain.userFollow;
+package com.example.demo.domain.userFollow.entity;
 
 import com.example.demo.domain.InformationEntity;
 import com.example.demo.domain.user.entity.User;

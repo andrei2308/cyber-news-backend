@@ -15,8 +15,6 @@ import com.example.demo.service.userFollow.UserFollowService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(value = UserController.API_USER_ROUTE)
 public class UserController {
@@ -32,8 +30,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> getUser(@PathVariable String userId) {
-        UserDto userDto = userService.findUserById(userId);
+    public ResponseEntity<UserProfile> getUser(@PathVariable String userId) {
+        UserProfile userDto = userService.findUserById(userId);
 
         return ResponseEntity.ok(userDto);
     }
@@ -72,16 +70,6 @@ public class UserController {
     public ResponseEntity<String> follow(@PathVariable String userId) {
         userService.follow(userId);
         return ResponseEntity.ok("User followed !");
-    }
-
-    @GetMapping("{userId}/followers")
-    public ResponseEntity<List<UserProfile>> getFollowers(@PathVariable String userId) {
-        return ResponseEntity.ok(userFollowService.getFollowers(userId));
-    }
-
-    @GetMapping("{userId}/following")
-    public ResponseEntity<List<UserProfile>> getFollowing(@PathVariable String userId) {
-        return ResponseEntity.ok(userFollowService.getFollowing(userId));
     }
 
     @PostMapping("{userId}/unfollow")
