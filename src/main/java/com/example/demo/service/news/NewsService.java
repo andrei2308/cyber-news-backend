@@ -16,4 +16,8 @@ public interface NewsService {
     NewsDto createNewsForUser(String userId, NewsCreateVM newsCreateVM);
 
     CveDetailsResponse fetchFromNIST(String cveId);
+
+    void likeNews(String newsId);
+
+    void unlikeNews(String newsId);
 }

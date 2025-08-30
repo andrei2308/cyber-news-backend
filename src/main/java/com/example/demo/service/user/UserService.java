@@ -4,6 +4,7 @@ import com.example.demo.domain.token.entity.dto.TokenRefreshDto;
 import com.example.demo.domain.user.dtos.LoginVM;
 import com.example.demo.domain.user.dtos.RegisterVM;
 import com.example.demo.domain.user.dtos.UserDto;
+import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public interface UserService {
 
     void unfollow(String userId);
 
-    UserDto findUserById(String userId);
+    UserProfile findUserById(String userId);
 
     User findByUsername(String username);
 

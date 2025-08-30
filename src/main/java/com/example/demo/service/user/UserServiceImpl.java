@@ -8,6 +8,7 @@ import com.example.demo.domain.token.repository.TokenRepository;
 import com.example.demo.domain.user.dtos.LoginVM;
 import com.example.demo.domain.user.dtos.RegisterVM;
 import com.example.demo.domain.user.dtos.UserDto;
+import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
 import com.example.demo.service.userFollow.UserFollowService;
@@ -141,9 +142,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findUserById(String userId) {
+    public UserProfile findUserById(String userId) {
         return modelMapper.map(userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Could not find user with provided id !")), UserDto.class);
+                .orElseThrow(() -> new IllegalArgumentException("Could not find user with provided id !")), UserProfile.class);
     }
 
     @Override
@@ -249,8 +250,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkNotAlreadyFollowing(User currentUser, User userToFollow) {
-        boolean alreadyFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
-        if (alreadyFollowing) {
+        boolean isFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
+        if (isFollowing) {
             throw new IllegalStateException("Already following this user !");
         }
     }
@@ -268,8 +269,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkIsFollowing(User currentUser, User userToFollow) {
-        boolean notFollowing = userFollowService.checkNotFollowing(currentUser.getId(), userToFollow.getId());
-        if (!notFollowing) {
+        boolean isFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
+        if (!isFollowing) {
             throw new IllegalStateException("You can not unfollow a user you don't follow !");
         }
     }
