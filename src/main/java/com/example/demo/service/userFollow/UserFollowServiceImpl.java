@@ -23,11 +23,6 @@ public class UserFollowServiceImpl implements UserFollowService {
     }
 
     @Override
-    public boolean checkNotFollowing(String currentUserId, String followingUserId) {
-        return !userFollowRepository.existsByFollowerIdAndFollowingId(currentUserId, followingUserId);
-    }
-
-    @Override
     public void followUser(User currentUser, User followingUser) {
         UserFollow userFollow = new UserFollow();
         userFollow.setFollower(currentUser);

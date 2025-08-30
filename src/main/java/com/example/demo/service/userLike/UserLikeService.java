@@ -9,4 +9,6 @@ public interface UserLikeService {
     void like(User currentUser, News newsToLike);
 
     void unlike(User currentUser, News newsToUnlike);
+
+    boolean checkAlreadyLiked(User currentUser, News newsToLike);
 }

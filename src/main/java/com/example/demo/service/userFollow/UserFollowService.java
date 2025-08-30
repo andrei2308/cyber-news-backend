@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 public interface UserFollowService {
     boolean checkAlreadyFollowing(String currentUserId, String followingUserId);
 
-    boolean checkNotFollowing(String currentUserId, String followingUserId);
-
     void followUser(User currentUser, User followingUser);
 
     void unfollowUser(User currentUser, User unfollowingUser);

@@ -30,4 +30,9 @@ public class UserLikeServiceImpl implements UserLikeService {
 
         userLikeRepository.deleteById(likedNewsAndUserId);
     }
+
+    @Override
+    public boolean checkAlreadyLiked(User currentUser, News newsToLike) {
+        return userLikeRepository.existsByLikedUserAndLikedPost(currentUser, newsToLike);
+    }
 }

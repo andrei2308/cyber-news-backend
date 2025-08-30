@@ -99,6 +99,8 @@ public class NewsServiceImpl implements NewsService {
         User currentUser = getCurrentUser();
         News newsToLike = newsRepository.findById(newsId).orElseThrow(() -> new IllegalArgumentException("News not found !"));
 
+        checkNotAlreadyLiked(currentUser, newsToLike);
+
         userLikeService.like(currentUser, newsToLike);
     }
 
@@ -107,6 +109,8 @@ public class NewsServiceImpl implements NewsService {
     public void unlikeNews(String newsId) {
         User currentUser = getCurrentUser();
         News newsToUnlike = newsRepository.findById(newsId).orElseThrow(() -> new IllegalArgumentException("News not found !"));
+
+        checkIsLiked(currentUser, newsToUnlike);
 
         userLikeService.unlike(currentUser, newsToUnlike);
     }
@@ -200,5 +204,19 @@ public class NewsServiceImpl implements NewsService {
         }
 
         return principal.toString();
+    }
+
+    private void checkNotAlreadyLiked(User currentUser, News newsToLike) {
+        boolean alreadyLiked = userLikeService.checkAlreadyLiked(currentUser, newsToLike);
+        if (alreadyLiked) {
+            throw new IllegalArgumentException("News already liked !");
+        }
+    }
+
+    private void checkIsLiked(User currentUser, News newsToUnlike) {
+        boolean isLiked = userLikeService.checkAlreadyLiked(currentUser, newsToUnlike);
+        if (!isLiked) {
+            throw new IllegalArgumentException("News not liked !");
+        }
     }
 }

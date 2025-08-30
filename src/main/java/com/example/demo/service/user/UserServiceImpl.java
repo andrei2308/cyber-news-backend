@@ -250,8 +250,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkNotAlreadyFollowing(User currentUser, User userToFollow) {
-        boolean alreadyFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
-        if (alreadyFollowing) {
+        boolean isFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
+        if (isFollowing) {
             throw new IllegalStateException("Already following this user !");
         }
     }
@@ -269,8 +269,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkIsFollowing(User currentUser, User userToFollow) {
-        boolean notFollowing = userFollowService.checkNotFollowing(currentUser.getId(), userToFollow.getId());
-        if (!notFollowing) {
+        boolean isFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
+        if (!isFollowing) {
             throw new IllegalStateException("You can not unfollow a user you don't follow !");
         }
     }
