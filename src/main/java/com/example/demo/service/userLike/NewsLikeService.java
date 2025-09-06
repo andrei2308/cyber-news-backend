@@ -5,7 +5,7 @@ import com.example.demo.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface UserLikeService {
+public interface NewsLikeService {
     void like(User currentUser, News newsToLike);
 
     void unlike(User currentUser, News newsToUnlike);
