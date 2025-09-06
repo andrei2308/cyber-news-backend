@@ -11,7 +11,7 @@ import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.news.repository.NewsRepository;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
-import com.example.demo.service.userLike.UserLikeService;
+import com.example.demo.service.userLike.NewsLikeService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -29,8 +29,8 @@ import java.util.List;
 @Service
 public class NewsServiceImpl implements NewsService {
 
-    private final UserLikeService userLikeService;
 
+    private final NewsLikeService newsLikeService;
     private final RestTemplate restTemplate;
     private final NewsRepository newsRepository;
     private final UserRepository userRepository;
@@ -39,12 +39,12 @@ public class NewsServiceImpl implements NewsService {
     private String nistUrl;
 
 
-    public NewsServiceImpl(NewsRepository newsRepository, UserRepository userRepository, ModelMapper modelMapper, RestTemplate restTemplate, UserLikeService userLikeService) {
+    public NewsServiceImpl(NewsRepository newsRepository, UserRepository userRepository, ModelMapper modelMapper, RestTemplate restTemplate, NewsLikeService userLikeService) {
         this.newsRepository = newsRepository;
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.restTemplate = restTemplate;
-        this.userLikeService = userLikeService;
+        this.newsLikeService = userLikeService;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class NewsServiceImpl implements NewsService {
 
         checkNotAlreadyLiked(currentUser, newsToLike);
 
-        userLikeService.like(currentUser, newsToLike);
+        newsLikeService.like(currentUser, newsToLike);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class NewsServiceImpl implements NewsService {
 
         checkIsLiked(currentUser, newsToUnlike);
 
-        userLikeService.unlike(currentUser, newsToUnlike);
+        newsLikeService.unlike(currentUser, newsToUnlike);
     }
 
     private CveData extractCveData(CveMinimal cve) {
@@ -207,14 +207,14 @@ public class NewsServiceImpl implements NewsService {
     }
 
     private void checkNotAlreadyLiked(User currentUser, News newsToLike) {
-        boolean alreadyLiked = userLikeService.checkAlreadyLiked(currentUser, newsToLike);
+        boolean alreadyLiked = newsLikeService.checkAlreadyLiked(currentUser, newsToLike);
         if (alreadyLiked) {
             throw new IllegalArgumentException("News already liked !");
         }
     }
 
     private void checkIsLiked(User currentUser, News newsToUnlike) {
-        boolean isLiked = userLikeService.checkAlreadyLiked(currentUser, newsToUnlike);
+        boolean isLiked = newsLikeService.checkAlreadyLiked(currentUser, newsToUnlike);
         if (!isLiked) {
             throw new IllegalArgumentException("News not liked !");
         }

@@ -2,17 +2,17 @@ package com.example.demo.service.userLike;
 
 import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.newsLikes.entity.NewsLikes;
-import com.example.demo.domain.newsLikes.repository.UserLikeRepository;
+import com.example.demo.domain.newsLikes.repository.NewsLikeRepository;
 import com.example.demo.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserLikeServiceImpl implements UserLikeService {
+public class NewsLikeServiceImpl implements NewsLikeService {
 
-    private final UserLikeRepository userLikeRepository;
+    private final NewsLikeRepository newsLikeRepository;
 
-    public UserLikeServiceImpl(UserLikeRepository userLikeRepository) {
-        this.userLikeRepository = userLikeRepository;
+    public NewsLikeServiceImpl(NewsLikeRepository userLikeRepository) {
+        this.newsLikeRepository = userLikeRepository;
     }
 
     @Override
@@ -21,18 +21,18 @@ public class UserLikeServiceImpl implements UserLikeService {
         newsLikes.setLikedPost(newsToLike);
         newsLikes.setLikedUser(currentUser);
 
-        userLikeRepository.save(newsLikes);
+        newsLikeRepository.save(newsLikes);
     }
 
     @Override
     public void unlike(User currentUser, News newsToUnlike) {
-        String likedNewsAndUserId = userLikeRepository.findLikedNewsByNewsIdAndUserId(currentUser.getId(), newsToUnlike.getId());
+        String likedNewsAndUserId = newsLikeRepository.findLikedNewsByNewsIdAndUserId(currentUser.getId(), newsToUnlike.getId());
 
-        userLikeRepository.deleteById(likedNewsAndUserId);
+        newsLikeRepository.deleteById(likedNewsAndUserId);
     }
 
     @Override
     public boolean checkAlreadyLiked(User currentUser, News newsToLike) {
-        return userLikeRepository.existsByLikedUserAndLikedPost(currentUser, newsToLike);
+        return newsLikeRepository.existsByLikedUserAndLikedPost(currentUser, newsToLike);
     }
 }
