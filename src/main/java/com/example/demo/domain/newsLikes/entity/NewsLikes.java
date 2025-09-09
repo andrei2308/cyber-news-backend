@@ -3,10 +3,7 @@ package com.example.demo.domain.newsLikes.entity;
 import com.example.demo.domain.InformationEntity;
 import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.user.entity.User;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,11 +13,11 @@ import lombok.Setter;
 @Setter
 public class NewsLikes extends InformationEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private News likedPost;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User likedUser;
 }

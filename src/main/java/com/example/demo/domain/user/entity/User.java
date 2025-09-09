@@ -5,10 +5,7 @@ import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.newsLikes.entity.NewsLikes;
 import com.example.demo.domain.userFollow.entity.UserFollow;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +15,27 @@ import java.util.Set;
 @Entity(name = "users")
 @Setter
 @Getter
+@NamedEntityGraph(
+        name = "User.withFollowers",
+        attributeNodes = {
+                @NamedAttributeNode(value = "following", subgraph = "following.following"),
+                @NamedAttributeNode(value = "followers", subgraph = "followers.follower")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "following.following",
+                        attributeNodes = {
+                                @NamedAttributeNode("following")
+                        }
+                ),
+                @NamedSubgraph(
+                        name = "followers.follower",
+                        attributeNodes = {
+                                @NamedAttributeNode("follower")
+                        }
+                )
+        }
+)
 public class User extends InformationEntity {
 
     @Column(name = "UserRole")

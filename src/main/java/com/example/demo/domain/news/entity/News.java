@@ -14,6 +14,19 @@ import java.util.Set;
 @Entity
 @Setter
 @Getter
+@NamedEntityGraph(
+        name = "News.withUserAndLikes",
+        attributeNodes = {
+                @NamedAttributeNode("user"),
+                @NamedAttributeNode(value = "userLikes", subgraph = "userLikes.user")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "userLikes.user",
+                        attributeNodes = @NamedAttributeNode("likedUser")
+                )
+        }
+)
 public class News extends InformationEntity {
 
     @Column(name = "Title")
@@ -32,7 +45,7 @@ public class News extends InformationEntity {
     @Column(name = "Affected_systems")
     private String affectedSystems;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     @OneToMany(mappedBy = "likedPost", fetch = FetchType.LAZY, orphanRemoval = true)
