@@ -49,12 +49,12 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsDto> getAllNews() {
-        List<News> newsList = newsRepository.findAllWithUsers();
+        List<News> newsList = newsRepository.findAll();
         return newsList.stream().map(news -> modelMapper.map(news, NewsDto.class)).toList();
     }
 
     public List<NewsDto> getUserNews(String userId) {
-        List<News> userNews = newsRepository.findNewsByUserIdWithUser(userId);
+        List<News> userNews = newsRepository.findByUserId(userId);
         return userNews.stream()
                 .map(news -> modelMapper.map(news, NewsDto.class))
                 .toList();

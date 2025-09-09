@@ -12,6 +12,12 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
+@NamedEntityGraph(
+        name = "Token.withUser",
+        attributeNodes = {
+                @NamedAttributeNode("user")
+        }
+)
 public class Token extends BaseEntity {
 
     @ManyToOne
