@@ -11,14 +11,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface NewsRepository extends JpaRepository<News, String> {
-    Set<News> findNewsByUser(User user);
 
     @EntityGraph("News.withUserAndLikes")
     List<News> findByUserId(@Param("userId") String userId);
 
     @EntityGraph("News.withUserAndLikes")
-    List<News> findAll();
+    Optional<News> findById(String id);
 
     @EntityGraph("News.withUserAndLikes")
-    Optional<News> findById(String id);
+    List<News> findByUserIdNot(String id);
 }
