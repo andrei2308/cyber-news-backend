@@ -2,13 +2,14 @@
   <configuration default="false" name="CyberNews" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <envs>
       <env name="DATASOURCE_PASSWORD" value="Ghiozdan1!@" />
-      <env name="DATASOURCE_URL" value="jdbc:postgresql://localhost:5432/cyber-news-db" />
+      <env name="DATASOURCE_URL" value="jdbc:postgresql://localhost:5432/cyber-news-db?sslmode=disable" />
       <env name="DATASOURCE_USERNAME" value="postgres" />
       <env name="SECRET_KEY" value="seccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgsseccccdwadwafegrasgs" />
       <env name="JPA_DATABASE_PLATFORM" value="org.hibernate.dialect.PostgreSQLDialect" />
       <env name="DATASOURCE_DRIVER_CLASS_NAME" value="org.postgresql.Driver" />
+      <env name="NIST_CVE_URI" value="https://services.nvd.nist.gov/rest/json/cves/2.0/?cveId=" />
     </envs>
-    <module name="demo" />
+    <module name="cyber-news" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.demo.DemoApplication" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
