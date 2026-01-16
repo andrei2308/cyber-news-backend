@@ -11,7 +11,6 @@ import com.example.demo.domain.user.dtos.UserDto;
 import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.service.news.NewsService;
 import com.example.demo.service.user.UserService;
-import com.example.demo.service.userFollow.UserFollowService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +19,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     public static final String API_USER_ROUTE = Constants.DEFAULT_ROUTE + "/user";
     private final UserService userService;
-    private final UserFollowService userFollowService;
     private final NewsService newsService;
 
-    public UserController(UserService userService, UserFollowService userFollowService, NewsService newsService) {
+    public UserController(UserService userService, NewsService newsService) {
         this.userService = userService;
-        this.userFollowService = userFollowService;
         this.newsService = newsService;
     }
 
