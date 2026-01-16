@@ -11,7 +11,8 @@ import com.example.demo.domain.user.dtos.UserDto;
 import com.example.demo.domain.user.dtos.UserProfile;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
-import com.example.demo.service.userFollow.UserFollowService;
+import com.example.demo.domain.userFollow.entity.UserFollow;
+import com.example.demo.domain.userFollow.repository.UserFollowRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
@@ -38,16 +39,16 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
-    private final UserFollowService userFollowService;
+    private final UserFollowRepository userFollowRepository;
     private final ModelMapper modelMapper;
 
-    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, UserFollowService userFollowService, ModelMapper modelMapper) {
+    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, UserFollowRepository userFollowRepository, ModelMapper modelMapper) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.tokenRepository = tokenRepository;
-        this.userFollowService = userFollowService;
+        this.userFollowRepository = userFollowRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -177,7 +178,9 @@ public class UserServiceImpl implements UserService {
         checkNotAlreadyFollowing(currentUser, userToFollow);
         checkNotFollowingItself(currentUser, userToFollow);
 
-        userFollowService.followUser(currentUser, userToFollow);
+        UserFollow userFollow = buildUserFollow(currentUser, userToFollow);
+
+        userFollowRepository.save(userFollow);
     }
 
     @Override
@@ -188,7 +191,8 @@ public class UserServiceImpl implements UserService {
         checkIsFollowing(currentUser, userToUnfollow);
         checkNotUnfollowingItself(currentUser, userToUnfollow);
 
-        userFollowService.unfollowUser(currentUser, userToUnfollow);
+        String idToDelete = userFollowRepository.findUserToUnfollow(currentUser.getId(), userToUnfollow.getId());
+        userFollowRepository.deleteById(idToDelete);
     }
 
     private User getCurrentUser() {
@@ -250,8 +254,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkNotAlreadyFollowing(User currentUser, User userToFollow) {
-        boolean isFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
-        if (isFollowing) {
+        if (checkAlreadyFollowing(currentUser.getId(), userToFollow.getId())) {
             throw new IllegalStateException("Already following this user !");
         }
     }
@@ -269,9 +272,19 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkIsFollowing(User currentUser, User userToFollow) {
-        boolean isFollowing = userFollowService.checkAlreadyFollowing(currentUser.getId(), userToFollow.getId());
-        if (!isFollowing) {
+        if (!checkAlreadyFollowing(currentUser.getId(), userToFollow.getId())) {
             throw new IllegalStateException("You can not unfollow a user you don't follow !");
         }
+    }
+
+    public boolean checkAlreadyFollowing(String currentUserId, String followingUserId) {
+        return userFollowRepository.existsByFollowerIdAndFollowingId(currentUserId, followingUserId);
+    }
+
+    private UserFollow buildUserFollow(User currentUser, User userToFollow) {
+        UserFollow userFollow = new UserFollow();
+        userFollow.setFollower(currentUser);
+        userFollow.setFollowing(userToFollow);
+        return userFollow;
     }
 }
