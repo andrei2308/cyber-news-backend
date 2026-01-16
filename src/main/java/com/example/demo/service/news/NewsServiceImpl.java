@@ -9,9 +9,10 @@ import com.example.demo.domain.news.dtos.nistMappingDtos.CveMinimal;
 import com.example.demo.domain.news.dtos.nistMappingDtos.NistApiResponse;
 import com.example.demo.domain.news.entity.News;
 import com.example.demo.domain.news.repository.NewsRepository;
+import com.example.demo.domain.newsLikes.entity.NewsLikes;
+import com.example.demo.domain.newsLikes.repository.NewsLikeRepository;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
-import com.example.demo.service.userLike.NewsLikeService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -30,21 +31,21 @@ import java.util.List;
 public class NewsServiceImpl implements NewsService {
 
 
-    private final NewsLikeService newsLikeService;
     private final RestTemplate restTemplate;
     private final NewsRepository newsRepository;
     private final UserRepository userRepository;
+    private final NewsLikeRepository newsLikeRepository;
     private final ModelMapper modelMapper;
     @Value("${cve.nist.url}")
     private String nistUrl;
 
 
-    public NewsServiceImpl(NewsRepository newsRepository, UserRepository userRepository, ModelMapper modelMapper, RestTemplate restTemplate, NewsLikeService userLikeService) {
+    public NewsServiceImpl(NewsRepository newsRepository, UserRepository userRepository, ModelMapper modelMapper, RestTemplate restTemplate, NewsLikeRepository newsLikeRepository) {
         this.newsRepository = newsRepository;
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.restTemplate = restTemplate;
-        this.newsLikeService = userLikeService;
+        this.newsLikeRepository = newsLikeRepository;
     }
 
     @Override
@@ -100,8 +101,9 @@ public class NewsServiceImpl implements NewsService {
         News newsToLike = newsRepository.findById(newsId).orElseThrow(() -> new IllegalArgumentException("News not found !"));
 
         checkNotAlreadyLiked(currentUser, newsToLike);
+        NewsLikes newsLikes = buildNewsLike(newsToLike, currentUser);
 
-        newsLikeService.like(currentUser, newsToLike);
+        newsLikeRepository.save(newsLikes);
     }
 
     @Override
@@ -112,7 +114,9 @@ public class NewsServiceImpl implements NewsService {
 
         checkIsLiked(currentUser, newsToUnlike);
 
-        newsLikeService.unlike(currentUser, newsToUnlike);
+        String likedNewsAndUserId = newsLikeRepository.findLikedNewsByNewsIdAndUserId(currentUser.getId(), newsToUnlike.getId());
+
+        newsLikeRepository.deleteById(likedNewsAndUserId);
     }
 
     private CveData extractCveData(CveMinimal cve) {
@@ -207,16 +211,26 @@ public class NewsServiceImpl implements NewsService {
     }
 
     private void checkNotAlreadyLiked(User currentUser, News newsToLike) {
-        boolean alreadyLiked = newsLikeService.checkAlreadyLiked(currentUser, newsToLike);
-        if (alreadyLiked) {
+        if (checkAlreadyLiked(currentUser, newsToLike)) {
             throw new IllegalArgumentException("News already liked !");
         }
     }
 
     private void checkIsLiked(User currentUser, News newsToUnlike) {
-        boolean isLiked = newsLikeService.checkAlreadyLiked(currentUser, newsToUnlike);
-        if (!isLiked) {
+        if (checkAlreadyLiked(currentUser, newsToUnlike)) {
             throw new IllegalArgumentException("News not liked !");
         }
     }
+
+    private boolean checkAlreadyLiked(User currentUser, News newsToLike) {
+        return newsLikeRepository.existsByLikedUserAndLikedPost(currentUser, newsToLike);
+    }
+
+    private NewsLikes buildNewsLike(News newsToLike, User currentUser) {
+        NewsLikes newsLikes = new NewsLikes();
+        newsLikes.setLikedPost(newsToLike);
+        newsLikes.setLikedUser(currentUser);
+        return newsLikes;
+    }
+
 }
