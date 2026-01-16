@@ -9,10 +9,14 @@ import com.example.demo.domain.user.dtos.LoginVM;
 import com.example.demo.domain.user.dtos.RegisterVM;
 import com.example.demo.domain.user.dtos.UserDto;
 import com.example.demo.domain.user.dtos.UserProfile;
+import com.example.demo.domain.user.elasticsearch.document.UserDocument;
+import com.example.demo.domain.user.elasticsearch.repository.UserSearchRepository;
 import com.example.demo.domain.user.entity.User;
 import com.example.demo.domain.user.repository.UserRepository;
 import com.example.demo.domain.userFollow.entity.UserFollow;
 import com.example.demo.domain.userFollow.repository.UserFollowRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
@@ -40,15 +44,20 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
     private final UserFollowRepository userFollowRepository;
+    private final UserSearchRepository userSearchRepository;
     private final ModelMapper modelMapper;
 
-    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, UserFollowRepository userFollowRepository, ModelMapper modelMapper) {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public UserServiceImpl(JwtUtil jwtUtil, UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenRepository tokenRepository, UserFollowRepository userFollowRepository, UserSearchRepository userSearchRepository, ModelMapper modelMapper) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.tokenRepository = tokenRepository;
         this.userFollowRepository = userFollowRepository;
+        this.userSearchRepository = userSearchRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -69,7 +78,10 @@ public class UserServiceImpl implements UserService {
         user.setUserRole("USER");
         user.setCreatedDate(new Date());
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // 2. Sync to Elasticsearch
+        syncUserToElasticsearch(savedUser);
     }
 
     @Override
@@ -181,6 +193,9 @@ public class UserServiceImpl implements UserService {
         UserFollow userFollow = buildUserFollow(currentUser, userToFollow);
 
         userFollowRepository.save(userFollow);
+
+        entityManager.refresh(userToFollow);
+        syncUserToElasticsearch(userToFollow);
     }
 
     @Override
@@ -193,6 +208,10 @@ public class UserServiceImpl implements UserService {
 
         String idToDelete = userFollowRepository.findUserToUnfollow(currentUser.getId(), userToUnfollow.getId());
         userFollowRepository.deleteById(idToDelete);
+
+        userFollowRepository.flush();
+        entityManager.refresh(userToUnfollow);
+        syncUserToElasticsearch(userToUnfollow);
     }
 
     private User getCurrentUser() {
@@ -286,5 +305,14 @@ public class UserServiceImpl implements UserService {
         userFollow.setFollower(currentUser);
         userFollow.setFollowing(userToFollow);
         return userFollow;
+    }
+
+    private void syncUserToElasticsearch(User user) {
+        try {
+            UserDocument document = UserDocument.from(user);
+            userSearchRepository.save(document);
+        } catch (Exception e) {
+            System.err.println("Failed to sync user to Elasticsearch: " + e.getMessage()); // todo get a logger; log4j
+        }
     }
 }

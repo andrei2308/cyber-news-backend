@@ -5,34 +5,37 @@ services:
     image: postgres:15-alpine
     container_name: postgres_db
     ports:
-      - "5432:5432" # local -> container
+      - "5432:5432"
     environment:
-      - POSTGRES_USER=${POSTGRES_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${POSTGRES_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${DATABASE_NAME:-news_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  elasticsearch:
+    networks:
+      - app_network
+
+  es-search-engine:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
-    container_name: elasticsearch
+    container_name: es_search_engine
     environment:
-      - node.name=elasticsearch
+      - node.name=es-node
       - cluster.name=es-docker-cluster
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
-      - xpack.ml.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - ELASTIC_PASSWORD="123456"
+      - xpack.security.enabled=true
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - es_data_v3:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
     networks:
-      - elastic
+      - app_network
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.11.1
@@ -40,15 +43,19 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=https://es-search-engine:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD="123456"
     depends_on:
-      - elasticsearch
+      - es-search-engine
     networks:
-      - elastic
+      - app_network
+
 volumes:
   postgres_data:
-  es_data:
+  es_data_v3:
     driver: local
+
 networks:
-  elastic:
+  app_network:
     driver: bridge
